@@ -1,0 +1,137 @@
+
+import numpy as np
+
+"""
+Python Test
+
+Overview:
+You are the Revenue Optimization Analyst for a brand new LCC
+So far, the airline has been using a simple pricing strategy - and 4 different "starting fares" as an experiment to see which would work best. This can be seen in the function "pricingSystem"
+"simulateFlights" and "calculateSales" are used to simulate what happens when these pricing strategies are put to action
+the data:
+startingFares: an array showing the fare the 1000 flights began at
+bookingHistory: number of bookings in each period
+There are 10 periods, 0 is when the flight is first on sale, 9 is the last period before departure
+ Elasticity and expected number of bookings change throughout the periods
+Each flight can fit a max of 100 passengers
+fareHistory: the fare that was charged
+
+
+Python functions that would be useful to brush up on for this test:
+For loops
+If statements
+Numpy: sum, mean, cumsum, zeros
+Working with arrays: indexing, slicing, boolean indexing
+
+
+
+"""
+
+def calculateSales(period,fare):
+    table = [[10948.203698364247, -1.7618718586337401],
+         [12316.724154672282, -1.7618717557777104],
+         [27227.757147460881, -1.9069276555536103],
+         [27227.757147460881, -1.9069276555536103],
+         [31923.373918589208, -1.9259216939097417],
+         [96784.984473477307, -2.1392197997378548],
+         [222801.30985081987, -2.2737725815790211],
+         [473224.98690729542, -2.4112936860531948],
+         [40392.333438497895, -1.8195040367267661],
+         [18371.836652604059, -1.6465484040077045]]
+    a = table[period][0]
+    b = table[period][1]
+    seatsSold1 = max(0.0,a*fare**b)
+    seatsSold2 = np.random.poisson(seatsSold1)
+    if seatsSold1 == seatsSold2:
+        return seatsSold1
+    elif seatsSold2 > seatsSold1:
+        seatsSold2 = seatsSold2 + np.round((seatsSold1-seatsSold2-.5)/2.0,0)
+    else:
+        seatsSold2 = seatsSold2 + np.round((seatsSold1-seatsSold2+.5)/2.0,0)
+    return seatsSold2
+
+def pricingSystem(bookings,startingFare):
+    if sum(bookings) < 60:
+        fare = startingFare
+    elif sum(bookings) < 70:
+        fare = startingFare + 10
+    elif sum(bookings) < 80:
+        fare = startingFare + 15
+    elif sum(bookings) < 90:
+        fare = startingFare + 25
+    else:
+        fare = startingFare + 50
+    return fare
+
+def simulateFlights():
+    numberOfFlights = 1000
+    startingFares = np.ones(numberOfFlights,float)
+    startingFares[:250] = 65
+    startingFares[250:500] = 68
+    startingFares[500:750] = 71
+    startingFares[750:] = 74
+    bookingHistory = np.zeros([numberOfFlights,10],float)
+    fareHistory = np.zeros([numberOfFlights,10],float)
+    for flightNum in range(numberOfFlights):
+        for period in range(10):
+            fareHistory[flightNum,period] = pricingSystem(bookingHistory[flightNum,:],startingFares[flightNum])
+            tempBookings = calculateSales(period,fareHistory[flightNum,period])
+            if tempBookings + np.sum(bookingHistory[flightNum,:]) <= 100.0:
+                bookingHistory[flightNum,period] = tempBookings
+            else:
+                bookingHistory[flightNum,period] = 100.0 - sum(bookingHistory[flightNum,:])
+    return startingFares,bookingHistory,fareHistory
+
+np.random.seed(19)
+startingFares,bookingHistory,fareHistory = simulateFlights()
+
+
+def question0(bookingHistory):
+    """
+    example question
+    What percent of flights sold out?
+    Answer can be a decimal or a percentage
+    """
+    answer = float(sum(np.sum(bookingHistory,1)==100.0)) / bookingHistory.shape[0]
+    return answer
+
+def question1():
+    """
+    Easy
+    Which pricing strategy was the best?
+    Answer can be a number or text
+    """
+    return answer
+def question2():
+    """
+    Easy
+    Assuming the average passenger has an additional $20 in ancillary revenue which pricing strategy is the best?
+    Answer can be a number or text
+    """
+    return answer
+def question3():
+    """
+    Medium
+    Without performing an in depth analysis (That will happen in question 5)
+    Create a report, graph, table or chart that would help the pricing team improve their pricing.
+    """
+    return answer
+def question4():
+    """
+    Hard
+    What is the price elasticity of demand at each period?
+    Build a function that calculates this from the data
+    Answer should be an array of floats
+    """
+    return answer
+def question5(period,bookings,fares):
+    """
+    Very Hard
+    Design a pricing system that improves revenue above the best rule you found in 2
+    To answer turn this function into something that outputs fare, like "pricingSystem" above.
+    You may create your own version of simulateFlights to test it.
+    The better the system, the higher you score on this question.
+    """
+    return fare
+
+print (question0(bookingHistory))
